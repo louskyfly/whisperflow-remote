@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="WhisperFlow">
+<meta name="theme-color" content="#050b16">
+<title>WhisperFlow — accès iPad</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100dvh; display: grid; place-items: center;
+    background: radial-gradient(900px 600px at 20% 0%, rgba(45,111,255,.35), transparent 60%),
+                radial-gradient(700px 500px at 90% 100%, rgba(0,190,255,.18), transparent 62%),
+                #040914;
+    color: #eef6ff; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif;
+    padding: 24px;
+  }
+  .card {
+    width: min(440px, 100%); padding: 26px 24px; text-align: center;
+    border: 1px solid rgba(179,222,255,.18); border-radius: 26px;
+    background: rgba(255,255,255,.06); backdrop-filter: blur(24px);
+    box-shadow: 0 24px 70px rgba(0,0,0,.45);
+  }
+  .orb {
+    width: 74px; height: 74px; margin: 0 auto 16px; border-radius: 50%;
+    background: radial-gradient(circle at 36% 32%, #f2fdff, #bdefff 34%, #55b7ff 72%, #2778ff);
+    box-shadow: 0 0 40px rgba(86,196,255,.45), inset 0 2px 8px rgba(255,255,255,.5);
+  }
+  h1 { margin: 0; font-size: 1.35rem; letter-spacing: -.02em; }
+  p { margin: 8px 0 0; color: #91a7c9; font-size: .92rem; }
+  a.primary {
+    display: block; margin-top: 22px; padding: 15px; border-radius: 16px;
+    background: linear-gradient(100deg, #2a6bff, #56c4ff); color: #03101f;
+    font-weight: 700; text-decoration: none;
+  }
+  .meta { margin-top: 14px; color: #6f86a8; font-size: .72rem; }
+  .state { margin-top: 6px; color: #ffc461; font-size: .78rem; }
+  ol { text-align: left; margin: 18px 0 0; padding-left: 20px; color: #91a7c9; font-size: .84rem; }
+  li { margin: 6px 0; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="orb"></div>
+    <h1>WhisperFlow</h1>
+    <p id="state">Recherche du PC…</p>
+    <a id="open" class="primary" href="#" hidden>Ouvrir WhisperFlow</a>
+    <div class="meta" id="meta"></div>
+    <ol>
+      <li>Ouvre cette page dans <b>Safari</b>.</li>
+      <li><b>Partager → Sur l’écran d’accueil</b> : tu gardes cette adresse fixe.</li>
+      <li>Le bouton suit automatiquement l’adresse actuelle du PC.</li>
+    </ol>
+  </div>
+<script>
+  const state = document.getElementById('state');
+  const open = document.getElementById('open');
+  const meta = document.getElementById('meta');
+
+  function go(url) {
+    const target = url + (url.includes('?') ? '&' : '?') + 'from=ipad';
+    open.href = target;
+    open.hidden = false;
+    state.textContent = 'PC joignable. Ouverture…';
+    setTimeout(() => { window.location.replace(target); }, 700);
+  }
+
+  fetch('./remote.json?t=' + Date.now(), { cache: 'no-store' })
+    .then((r) => r.ok ? r.json() : Promise.reject(r.status))
+    .then((data) => {
+      if (!data || !data.url) throw new Error('sans url');
+      meta.textContent = 'Mis à jour : ' + (data.updated || 'inconnu');
+      go(data.url);
+    })
+    .catch(() => {
+      state.textContent = 'PC hors ligne : allume l’ordinateur, puis recharge cette page.';
+      meta.textContent = '';
+    });
+</script>
+</body>
+</html>
